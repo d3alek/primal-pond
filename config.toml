@@ -2,6 +2,7 @@ baseurl = "http://primalpond.com/"
 languageCode = "bg"
 title = "primal pond"
 author = "d3alek"
+disqusShortname = "XYW"
 
 [params]
 logo      = "/images/logo.jpg"
