@@ -1,5 +1,5 @@
 baseurl = "http://primalpond.com/"
-languageCode = "bg"
+languageCode = "en"
 title = "primal pond"
 author = "d3alek"
 disqusShortname = "XYW"
@@ -11,5 +11,5 @@ twitter   = "https://twitter.com/d3alek"
 facebook  = "https://www.facebook.com/akodzhabashev"
 github    = "https://github.com/d3alek/"
 email     = "akodzhabashev@gmail.com"
-analytics = ""
+analytics = "UA-64684947-2"
 
