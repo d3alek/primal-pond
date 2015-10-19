@@ -1,6 +1,6 @@
 +++
-date = "2015-10-19T15:02:12+03:00"
-draft = true
+date = "2015-10-19T23:38:27+03:00"
+draft = false
 title = "Simple continous integration using Github and CodeDeploy"
 +++
 
