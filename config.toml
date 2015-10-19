@@ -1,0 +1,14 @@
+baseurl = "http://primalpond.com/"
+languageCode = "bg"
+title = "primal pond"
+author = "d3alek"
+
+[params]
+logo      = "/images/logo.jpg"
+copyright = "d3alek All rights reserved."
+twitter   = "https://twitter.com/d3alek"
+facebook  = "https://www.facebook.com/akodzhabashev"
+github    = "https://github.com/d3kod/"
+email     = "akodzhabashev@gmail.com"
+analytics = ""
+
