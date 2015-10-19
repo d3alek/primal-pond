@@ -2,7 +2,6 @@ baseurl = "http://primalpond.com/"
 languageCode = "en"
 title = "primal pond"
 author = "d3alek"
-disqusShortname = "XYW"
 
 [params]
 logo      = "/images/logo.jpg"
@@ -12,4 +11,5 @@ facebook  = "https://www.facebook.com/akodzhabashev"
 github    = "https://github.com/d3alek/"
 email     = "akodzhabashev@gmail.com"
 analytics = "UA-64684947-2"
+disqusShortname = "primalpond"
 
