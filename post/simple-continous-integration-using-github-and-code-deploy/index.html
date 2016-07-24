@@ -1,0 +1,122 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="utf-8">
+<meta name="generator" content="Hugo 0.16" />
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<link href="http://fonts.googleapis.com/css?family=Roboto:400,700" rel="stylesheet" type="text/css">
+<link rel="stylesheet" href="//cdnjs.cloudflare.com/ajax/libs/highlight.js/8.4/styles/github.min.css">
+<link rel="stylesheet" href="/css/normalize.css">
+<link rel="stylesheet" href="/css/skeleton.css">
+<link rel="stylesheet" href="/css/custom.css">
+<link rel="alternate" href="/index.xml" type="application/rss+xml" title="primal pond">
+<title>Simple continous integration using Github and CodeDeploy - primal pond</title>
+</head>
+<body>
+
+<div class="container">
+
+	<header role="banner">
+		<div class="header-logo">
+			<a href="/"><img src="/images/logo.jpg" width="60" height="60"></a>
+		</div>
+		
+	</header>
+
+
+	<main role="main">
+		<article itemscope itemtype="http://schema.org/BlogPosting">
+			<h1 class="entry-title" itemprop="headline">Simple continous integration using Github and CodeDeploy</h1>
+			<span class="entry-meta"><time itemprop="datePublished" datetime="2015-10-19">October 19, 2015</time></span>
+			<section itemprop="entry-text">
+				<p>This post describes the work-in-progress solution for continous integration of <a href="https://selo.to">Селото</a>. It uses only Github, AWS CodeDeploy and a few shell scripts specific to the deployed system&rsquo;s architecture.</p>
+
+<p>Connecting Git and CodeDeploy is nicely explained in <a href="http://blogs.aws.amazon.com/application-management/post/Tx33XKAKURCCW83/Automatically-Deploy-from-GitHub-Using-AWS-CodeDeploy">the AWS blog</a>. After following the article a git push results in the latest code pushed to an EC2 instance. If this is enough for your use case (ex. a static website/static blog), you are all set!</p>
+
+<p>If the code needs to be build you are in for more work. The last part of the AWS article suggests using a CI system to acheive this and points you to <a href="http://aws.amazon.com/codedeploy/product-integrations/">a list of alternatives</a>. None of them was convenient for me - either another system to maintain (ex. Jenkins) or another service to sign up for. The best option at the time of writing is AWS CodePipeline, which is unfortunately only available in the US East AWS region. <a href="https://selo.to">Селото</a> serves customers in Bulgaria and US East is a long way from there.</p>
+
+<p>So, let me show you how CodeDeploy can act as a CI system. <a href="http://docs.aws.amazon.com/codedeploy/latest/userguide/app-spec-ref.html">CodeDeploy</a> supports executing scripts before and after the code is deployed to the EC2 host. We can bundle these scripts with the code (say in the <em>scripts/</em> directory) so that they get deployed to the host. Here is the <em>appspec.yml</em>:</p>
+
+<pre><code class="language-yml">version: 0.0
+os: linux
+files:
+    - source: /
+      destination: /tmp/codeDeploy-build
+hooks:
+  BeforeInstall:
+    - location: scripts/clean-build-directory.sh
+  AfterInstall:
+    - location: scripts/build.sh
+    - location: scripts/test.sh
+    - location: scripts/deploy.sh
+</code></pre>
+
+<ol>
+<li>We specify that all files from the source revision will be copied to <em>/tmp/codeDeploy-build</em> (during the Install hook).</li>
+<li>In the BeforeInstall hook, we clean the build directory from the previous build (<em>/tmp/codeDeploy-build</em>). I like doing this before the build to make debugging failed builds easier as the code is still present in the directory.</li>
+<li>In the AfterInstall hook the code is already deployed to /tmp/codeDeploy-build and we can execute any scripts to build, test and deploy the application depending on our architecture. The next blog post will examine how this works for <a href="https://selo.to">Селото</a> - a Tomcat 8 web app running on <a href="https://aws.amazon.com/ecs/details/">ECS</a>.</li>
+</ol>
+
+<p>Important to note is that the scripts should be made up of expressions chained with <em>AND</em> i.e:</p>
+
+<pre><code class="language-bash">echo 1 &amp;&amp; \
+echo 2
+</code></pre>
+
+<p>This ensures that if one of the expressions fails the script will return the appropriate error code and cause the deploy to fail.</p>
+
+<p>That&rsquo;s it - a simple CI using vanilla CodeDeploy. Another useful hook that CodeDeploy supports is the ValidateService hook which is the last step of deployment and can be used to sound an alarm if the newly deployed service is unhealthy.</p>
+
+<p>I have not yet implemented notifications for successful/failed deployments. Thinking of wrapping all the shell scripts in one which sends the result of the build to an SNS topic. Let me know in the comments below if you figured it out.</p>
+
+			</section>
+		</article>
+	</main>
+
+<div id="disqus_thread"></div>
+<script type="text/javascript">
+
+(function() {
+    
+    
+    if (window.location.hostname == "localhost" || window.location.hostname == "127.0.0.1")
+        return;
+
+    var dsq = document.createElement('script'); dsq.type = 'text/javascript'; dsq.async = true;
+    var disqus_shortname = 'primalpond';
+    dsq.src = '//' + disqus_shortname + '.disqus.com/embed.js';
+    (document.getElementsByTagName('head')[0] || document.getElementsByTagName('body')[0]).appendChild(dsq);
+})();
+</script>
+<noscript>Please enable JavaScript to view the <a href="http://disqus.com/?ref_noscript">comments powered by Disqus.</a></noscript>
+<a href="http://disqus.com/" class="dsq-brlink">comments powered by <span class="logo-disqus">Disqus</span></a>
+
+
+
+	<footer role="contentinfo">
+		<div class="hr"></div>
+		<div class="footer-link">
+			<a href="mailto:akodzhabashev@gmail.com" target="_blank">Email</a></span>
+			<a href="https://twitter.com/d3alek" target="_blank">Twitter</a></span>
+			<a href="https://www.facebook.com/akodzhabashev" target="_blank">Facebook</a></span>
+			<a href="https://github.com/d3alek/" target="_blank">GitHub</a></span>
+		</div>
+		<div class="copyright">Copyright &copy; d3alek All rights reserved.</div>
+	</footer>
+
+</div>
+
+<script>
+	(function(i,s,o,g,r,a,m){i['GoogleAnalyticsObject']=r;i[r]=i[r]||function(){
+	(i[r].q=i[r].q||[]).push(arguments)},i[r].l=1*new Date();a=s.createElement(o),
+	m=s.getElementsByTagName(o)[0];a.async=1;a.src=g;m.parentNode.insertBefore(a,m)
+	})(window,document,'script','//www.google-analytics.com/analytics.js','ga');
+	ga('create', 'UA-64684947-2', 'auto');
+	ga('send', 'pageview');
+</script>
+
+<script src="//cdnjs.cloudflare.com/ajax/libs/highlight.js/8.4/highlight.min.js"></script>
+<script>hljs.initHighlightingOnLoad();</script>
+
+</body>
+</html>
